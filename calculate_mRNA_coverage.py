@@ -54,12 +54,14 @@ def read_transcript_lengths(dataset, convert):
     
     
 def get_start_end_coords(dataset):
-    coordinates_dict = {}  # key: transcript id, value: dict w/ keys "start" and "end"
+    # coordinates_dict is... key: transcript id, value: dict w/ keys "start" and "end"
+    coordinates_dict = {}
     infh = open("%s_transcript_CDS_start_end_locations.txt" % dataset, "r")
-    infh.next()  # skip header
+    next(infh)
     for line in infh:
         s = line.split("\t")
-        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}  # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}
                 
     return coordinates_dict
     
@@ -105,14 +107,14 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
 
     
     if convert[goi_id] in special_cases[dataset]:
-        print "Special"
-        print goi_id
-        print convert[goi_id]
+        print("Special")
+        print(goi_id)
+        print(convert[goi_id])
         if (convert[goi_id] == "ADAMTS13WT") or (convert[goi_id] == "F9WT"):
-            print base_name, convert[goi_id]
+            print(base_name, convert[goi_id])
             
             if base_name[0] in datasetinfo[dataset].wt:
-                print "yep it's here"
+                print("yep it's here")
                 string = goi_id + ":" + str(0) + "-" +  str(transcript_lengths[convert[goi_id]])
                 mpileup = pysam.mpileup("-a", "-r", string, "./Annotated_size_filtered_reads/%s/%s_annotated_sized.bam" % (dataset, base_name)).split("\n")            
                 mrna_coverage = {}
@@ -120,7 +122,7 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                 if len(mpileup) == 1 and mpileup[0] == "":
                     for i in range(0, transcript_lengths[convert[goi_id]]):
                         mrna_coverage[i] = 0
-                    print "Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name
+                    print("Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name)
                     
                 for i in range(0, len(mpileup)):
                     if mpileup[i] == "":
@@ -129,24 +131,24 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                     try:
                         mrna_position = int(s[1]) -1
                     except:
-                        print s
-                        print base_name
+                        print(s)
+                        print(base_name)
                     coverage = int(s[3])
                     mrna_coverage[i] = int(s[3])
                     
-                print "Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime()
+                print("Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage
             else:
                 mrna_coverage = {}
                 for i in range(0, transcript_lengths[convert[goi_id]]):
                     mrna_coverage[i] = 0
-                print "Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime() #bc otherwise samtools will crash
+                print("Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage
                 
         elif (convert[goi_id] == "ADAMTS13P118P") or (convert[goi_id] == "F9opt1") or (convert[goi_id] == "F91A") or (convert[goi_id] == "F9V107V"): 
-            print base_name, convert[goi_id]
+            print(base_name, convert[goi_id])
             if base_name[0] in datasetinfo[dataset].opt1:
-                print "yep it's here"
+                print("yep it's here")
                 string = goi_id + ":" + str(0) + "-" +  str(transcript_lengths[convert[goi_id]])
                 mpileup = pysam.mpileup("-a", "-r", string, "./Annotated_size_filtered_reads/%s/%s_annotated_sized.bam" % (dataset, base_name)).split("\n")            
                 mrna_coverage = {}
@@ -154,7 +156,7 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                 if len(mpileup) == 1 and mpileup[0] == "":
                     for i in range(0, transcript_lengths[convert[goi_id]]):
                         mrna_coverage[i] = 0
-                    print "Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name
+                    print("Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name)
                     
                 for i in range(0, len(mpileup)):
                     if mpileup[i] == "":
@@ -163,24 +165,24 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                     try:
                         mrna_position = int(s[1]) -1
                     except:
-                        print s
-                        print base_name
+                        print(s)
+                        print(base_name)
                     coverage = int(s[3])
                     mrna_coverage[i] = int(s[3])
                     
-                print "Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime()
+                print("Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage
             else:
                 mrna_coverage = {}
                 for i in range(0, transcript_lengths[convert[goi_id]]):
                     mrna_coverage[i] = 0
-                print "Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime() #bc otherwise samtools will crash
+                print("Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage
                 
         elif (convert[goi_id] == "F92A"):
-            print "hello"
-            print base_name, convert[goi_id]
-            print datasetinfo[dataset].opt2
+            print("hello")
+            print(base_name, convert[goi_id])
+            print(datasetinfo[dataset].opt2)
             if base_name[0] in datasetinfo[dataset].opt2:
                 string = goi_id + ":" + str(0) + "-" +  str(transcript_lengths[convert[goi_id]])
                 mpileup = pysam.mpileup("-a", "-r", string, "./Annotated_size_filtered_reads/%s/%s_annotated_sized.bam" % (dataset, base_name)).split("\n") 
@@ -189,7 +191,7 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                 if len(mpileup) == 1 and mpileup[0] == "":
                     for i in range(0, transcript_lengths[convert[goi_id]]):
                         mrna_coverage[i] = 0
-                    print "Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name 
+                    print("Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name )
 
                 for i in range(0, len(mpileup)):
                     if mpileup[i] == "":
@@ -198,19 +200,19 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                     try:
                         mrna_position = int(s[1]) -1
                     except:
-                        print s
-                        print base_name
+                        print(s)
+                        print(base_name)
                     coverage = int(s[3])
                     mrna_coverage[i] = int(s[3])
                     
-                print "Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime()
+                print("Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage
             
             else:
                 mrna_coverage = {}
                 for i in range(0, transcript_lengths[convert[goi_id]]):
                     mrna_coverage[i] = 0
-                print "Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime() #bc otherwise samtools will crash
+                print("Finished fudging mRNA coverage for %s" % base_name, "at", time.ctime())
                 return mrna_coverage                
 
             
@@ -221,12 +223,12 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
         
         mrna_coverage = {}
         
-        print base_name
+        print(base_name)
 
         if len(mpileup) == 1 and mpileup[0] == "":
             for i in range(0, transcript_lengths[convert[goi_id]]):
                 mrna_coverage[i] = 0
-            print "Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name
+            print("Finished filling in coverage with zeroes because no reads aligned to this gene for %s"  % base_name)
 
         else:
         
@@ -237,13 +239,13 @@ def calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, seque
                 try:
                     mrna_position = int(s[1]) -1
                 except:
-                    print s
-                    print base_name
+                    print(s)
+                    print(base_name)
                 coverage = int(s[3])
                 mrna_coverage[i] = int(s[3])
                 
                 
-            print "Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime()
+            print("Finished calculating mRNA coverage for %s" % base_name, "at", time.ctime())
 
         return mrna_coverage
        
@@ -321,7 +323,7 @@ def write_normalized_mrna_coverage_codon_averages(mrna_coverage_dict, cds_sequen
     normalization_numbers = {}
     for base_name in base_names:
         normalization_numbers[base_name] = float(sum(all_codon_averages[base_name]))/len(all_codon_averages[base_name])
-        print base_name, normalization_numbers[base_name]
+        print(base_name, normalization_numbers[base_name])
     
     for i in range(0, gene_lengths[convert[goi_id]], 3):
         codon_number = i/3
@@ -363,10 +365,10 @@ if __name__ == "__main__":
             if convert[key] == args.gene_of_interest:
                 goi_id = key
     else:
-        print "Invalid gene of interest provided. Exiting program now."
+        print("Invalid gene of interest provided. Exiting program now.")
 
         
-    print goi_id
+    print(goi_id)
         
 
     transcript_lengths = read_transcript_lengths(args.dataset, convert)
@@ -378,7 +380,7 @@ if __name__ == "__main__":
     
     data_files = sorted([x for x in os.listdir("./Annotated_size_filtered_reads/%s" % args.dataset) if x[-4:] == ".bam"])  # fix
     
-    print data_files
+    print(data_files)
     
     mrna_coverage_dict = {}
     base_names = []
@@ -386,11 +388,8 @@ if __name__ == "__main__":
 
     for f in data_files:
         base_name = "_".join(f.split(".")[0].split("_")[0:-2])
-        #print base_name
         base_names.append(base_name)
-        mrna_coverage_dict[base_name] = calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, sequence_dict, goi_id, args.dataset, base_name)
-        #calculate_gene_of_interest_coverage(convert, transcript_lengths, goi_id, args.dataset, base_name)
-        
+        mrna_coverage_dict[base_name] = calculate_mRNA_coverage(convert, transcript_lengths, coordinates_dict, sequence_dict, goi_id, args.dataset, base_name)        
     
     write_mrna_coverage(mrna_coverage_dict, sequence_dict, coordinates_dict, transcript_lengths, convert, goi_id, args.dataset, base_names)
     write_mrna_coverage_codon_averages(mrna_coverage_dict, cds_sequence_dict, coordinates_dict, gene_lengths, convert, goi_id, args.dataset, base_names)

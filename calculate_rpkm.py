@@ -29,7 +29,7 @@ class SampleRPKM(object):
                 else:
                     outfh.write(",".join([protein, convert[protein], str(self.rpkm[protein]), str(protein_lengths[protein]-(2*cutoff)), str(self.protein_counts[protein]), str(self.total_reads)]) + "\n")
             except KeyError as e:
-                continue # because of transcripts without cdses
+                continue
 
 
 def create_output_folders(dataset):
@@ -40,12 +40,15 @@ def create_output_folders(dataset):
         
         
 def get_start_end_coords(dataset):
-    coordinates_dict = {}  # key: transcript id, value: dict w/ keys "start" and "end"
+    # For coordinates_dict... key: transcript id, value: dict w/ keys "start" and "end"
+    coordinates_dict = {}
     infh = open("%s_transcript_CDS_start_end_locations.txt" % dataset, "r")
-    infh.next()  # skip header
+    # skip header
+    next(infh)
     for line in infh:
         s = line.split("\t")
-        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}  # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}
                 
     return coordinates_dict
     
@@ -56,7 +59,8 @@ def ensembl_ID_converter(dataset):
     with open("%s_ensembl_to_gene_id.tsv" % dataset, "r") as infh:
         for line in infh:
             s = line.rstrip().split("\t")
-            convert[s[0]] = s[1]  # key= ensembl_id, value= gene_id
+            # key= ensembl_id, value= gene_id
+            convert[s[0]] = s[1]
             
     return convert
     
@@ -88,7 +92,8 @@ def calculate_rpkm(dataset, base_name, sample_data, cutoffs, protein_lengths):
 
     read_totals = {}
     tot_infh = open("./Annotated_totals_per_read/%s/%s_read_counts.tsv" % (dataset, base_name), "r")
-    tot_infh.next()  # skip header
+    # skip header
+    next(tot_infh)
     for line in tot_infh:
         s = line.rstrip().split("\t")
         read_totals[s[0]] = float(s[1])

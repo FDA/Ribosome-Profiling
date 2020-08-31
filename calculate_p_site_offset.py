@@ -22,12 +22,15 @@ def create_output_folders(dataset):
     
     
 def get_start_end_coords(dataset):
-    coordinates_dict = {}  # key: transcript id, value: dict w/ keys "start" and "end"
+    #For coordinates_dict... key: transcript id, value: dict w/ keys "start" and "end"
+    coordinates_dict = {}
     infh = open("%s_transcript_CDS_start_end_locations.txt" % dataset, "r")
-    infh.next()  # skip header line
+    # skip header line
+    next(infh)
     for line in infh:
         s = line.split("\t")
-        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}  # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        # subtract 1 from start bc the values are 1-indexed, end is inclusive of last base so it balances the -1 shift
+        coordinates_dict[s[0]] = {"start":int(s[1])-1, "end":int(s[2])}
                 
     return coordinates_dict
 
@@ -36,12 +39,12 @@ def process_sample_p_site_offset(dataset, base_name, coordinates_dict):
     for i in range(18,36):
         offset_data[i] = OffsetTally.copy()
     
-    bamfile = pysam.AlignmentFile("./Tophat_output/%s/%s/%s_sorted.bam" % (dataset, base_name, base_name), "rb")
+    bamfile = pysam.AlignmentFile("./Hisat_output/%s/%s/%s_sorted.bam" % (dataset, base_name, base_name), "rb")
     
     for read in bamfile.fetch():
         if read.query_length > 35:
             continue 
-        offset = read.reference_start - coordinates_dict[read.reference_name]["start"]  # negative offset = upstream
+        offset = read.reference_start - coordinates_dict[read.reference_name]["start"]
         
         if abs(offset) > 20:
             continue
@@ -67,7 +70,7 @@ def process_sample_p_site_offset(dataset, base_name, coordinates_dict):
         
     outfh.close()
     
-    print "Finished with %s at " %base_name, time.ctime()
+    print("Finished with %s at " %base_name, time.ctime())
     
     return offset_data
     
@@ -104,14 +107,14 @@ def write_combined_file(dataset, base_names, offset_data_container):
         outfh.write(",".join(outline) + "\n")
         
     outfh.close()
-    print "Finished with combined offset file at", time.ctime()
+    print("Finished with combined offset file at", time.ctime())
             
         
      
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Calculate the length distribution of the reads in a dataset after adapter trimming, rRNA+tRNA decontamination, and alignment.")
-    parser.add_argument("dataset", help = "The folder you want to look in for the data, inside the TophatOutput folder (S1, S2, etc)")
+    parser.add_argument("dataset", help = "The folder you want to look in for the data, inside the HisatOutput folder (S1, S2, etc)")
     args = parser.parse_args()
     
     create_output_folders(args.dataset)
@@ -119,10 +122,10 @@ if __name__ == "__main__":
     
     offset_data_container = {}
     
-    data_folders = sorted(os.listdir("./Tophat_output/%s/" % args.dataset))
+    data_folders = sorted(os.listdir("./Hisat_output/%s/" % args.dataset))
     base_names = []
     
-    for f in data_folders:#[0:1]:
+    for f in data_folders:
         base_name = f
         base_names.append(base_name)
         offset_data_container[base_name] = process_sample_p_site_offset(args.dataset, base_name, coordinates_dict)

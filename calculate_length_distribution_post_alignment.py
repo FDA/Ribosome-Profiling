@@ -16,7 +16,7 @@ def calculate_length_distribution(dataset):
         LengthTallyDict[i] = 0
     
     # Get list of input files, in .bam format #
-    data_folders = sorted(os.listdir("./Tophat_output/%s/" % args.dataset))  # use the accepted_hits.bam folder in each file
+    data_folders = sorted(os.listdir("./Hisat_output/%s/" % args.dataset))
     
     # Create folders for the output to be placed #
     if not os.path.exists("./output_length_dist_post_alignment"):
@@ -46,13 +46,17 @@ def calculate_length_distribution(dataset):
     
     
     for f in data_folders:
-        base_name = f  # technically the name of the folder- doesn't need modification
-        lengths = LengthTallyDict.copy()  # create copy of the template container for this specific file
+        base_name = f
+        lengths = LengthTallyDict.copy()
     
         # Read data in, keep tallies
-        bamfile = pysam.AlignmentFile("./Tophat_output/%s/%s/%s_sorted.bam" % (args.dataset, f, f), "rb")
+        bamfile = pysam.AlignmentFile("./Hisat_output/%s/%s/%s_sorted.bam" % (args.dataset, f, f), "rb")
         for read in bamfile.fetch(until_eof = True):
-            lengths[read.query_length] += float(1)/read.get_tag("NH")
+            try:
+                lengths[read.query_length] += float(1)/read.get_tag("NH")
+            except:
+                continue
+                
         bamfile.close()
     
     
@@ -70,7 +74,7 @@ def calculate_length_distribution(dataset):
             outstring += "," + str(round(float(100*lengths[i])/lentot,3))
         outfh_lenperc.write(outstring + "\n")
     
-        print "Finished %s at" % f, time.ctime()
+        print("Finished %s at" % f, time.ctime())
 
     # Close output files when done with all samples
     outfh_len.close()

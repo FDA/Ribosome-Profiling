@@ -7,7 +7,8 @@ import pysam
 
 class DataSetSizeInfo(object):
     def __init__(self, sizes):
-        self.sizes = sizes  # list of sizes
+        # list of sizes
+        self.sizes = sizes
         
         
 def define_dataset_sizes():

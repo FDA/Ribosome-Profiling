@@ -21,7 +21,8 @@ data_files = sorted([x for x in os.listdir("./Annotated_reads/%s/" % args.datase
 base_names = []
 
 for f in data_files:
-    base_name = "_".join(f.split(".")[0].split("_")[1:])  # key for all_reads
+    # key for all_reads
+    base_name = "_".join(f.split(".")[0].split("_")[1:])
     base_names.append(base_name)
     frame_data[base_name] = {}
     
@@ -32,7 +33,8 @@ for f in data_files:
     read_totals = {}
     base_name = "_".join(f.split(".")[0].split("_")[1:])
     tot_infh = open("./Annotated_totals_per_read/%s/%s_read_counts.tsv" % (args.dataset, base_name), "r")
-    tot_infh.next()  # skip header
+    # skip header
+    next(tot_infh)
     for line in tot_infh:
         s = line.rstrip().split("\t")
         read_totals[s[0]] = float(s[1])
@@ -43,7 +45,8 @@ for f in data_files:
     for read in bamfile.fetch(until_eof = True):
         f = read.get_tag("rf")
         if f == -1:
-            continue  # skip the UTR reads that don't have a frame
+            # skip the UTR reads that don't have a frame
+            continue
         length = read.query_length
         read_nh = read_totals[read.qname]
         frame_data[base_name][length][f] += float(1)/read_nh
@@ -92,17 +95,17 @@ for key in sorted(frame_data.keys()):
     
     outfh.close()
         
-    print "Finished with %s frame distribution at " % key, time.ctime()
+    print("Finished with %s frame distribution at " % key, time.ctime())
 
-print "Now starting compiled file at", time.ctime(), "..."    
+print("Now starting compiled file at", time.ctime(), "...")
 
 outfh = open("./output_frame_dist_by_length/%s/%s_frame_distribution_compiled.csv" % (args.dataset, args.dataset), "w")
 num_files = len(data_files)
-first_header = [""] # space for frame column
+first_header = [""]
 for i in range(20,126):
-    first_header.append(str(i))  # number...
+    first_header.append(str(i))
     for j in range(0,num_files-1):
-        first_header.append("")  # ...followed by n-1 spaces until next number
+        first_header.append("")
 outfh.write(",".join(first_header) + "\n")
 
 second_header = ["Frame"]

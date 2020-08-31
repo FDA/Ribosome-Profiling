@@ -33,30 +33,26 @@ def unzip(dataset, base_name):
 
 
 def decontaminate_reads(dataset, base_name):
-    print dataset
-    print base_name
-    #bowtie_cmd = "bowtie -l 20 --un=Decontaminated_reads/%s_decontaminated.fastq Contaminants_bowtie/contaminants Trimmed/%s_trimmed.fastq >Contaminated_read_alignments/%s_contaminated_read_alignments.aln" % (base_name, base_name, base_name)
-    bowtie_cmd = "bowtie -l 20 --un=Decontaminated_reads/%s/%s_decontaminated.fastq BowtieIndex/contaminant_sequences Trimmed/%s/%s_trimmed.fastq >Contaminated_read_alignments/%s/%s_contaminated_read_alignments.aln" % (dataset, base_name, dataset, base_name, dataset, base_name)
-    if dataset == "S13b":
-        bowtie_cmd = "bowtie -l 10 --un=Decontaminated_reads/%s/%s_decontaminated.fastq BowtieIndex/contaminant_sequences Trimmed/%s/%s_trimmed.fastq.gz >Contaminated_read_alignments/%s/%s_contaminated_read_alignments.aln" % (dataset, base_name, dataset, base_name, dataset, base_name)
-
+    print(dataset)
+    print(base_name)
+    bowtie_cmd = "bowtie -l 20 --un=Decontaminated_reads/%s/%s_decontaminated.fastq HisatIndex/contaminant_sequences Trimmed/%s/%s_trimmed.fastq >Contaminated_read_alignments/%s/%s_contaminated_read_alignments.aln" % (dataset, base_name, dataset, base_name, dataset, base_name)
     
     log_fh = open("./Logs_decontamination/%s/%s_decontamination.log" % (dataset, base_name), "w")
-    print bowtie_cmd
+    print(bowtie_cmd)
     p = subprocess.Popen(bowtie_cmd, shell = True, stderr = log_fh)
     p.wait()
 
     log_fh.flush()
     log_fh.close()
 
-    print "Finished decontaminating sample %s at" % base_name, time.ctime()
-    print "Compressing %s..." % base_name
+    print("Finished decontaminating sample %s at" % base_name, time.ctime())
+    print("Compressing %s..." % base_name)
     
     gzip_cmd = "gzip ./Trimmed/%s/%s_trimmed.fastq" % (dataset, base_name)
     p3 = subprocess.Popen(gzip_cmd, shell = True)
     p3.wait()
     
-    print "Finished compressing %s at " % base_name, time.ctime()
+    print("Finished compressing %s at " % base_name, time.ctime())
     
     
     

@@ -24,11 +24,13 @@ def parse_sequence(dataset, ensembl_id):
     infh = open("./%s_all_CDS.fa" % dataset, "r")
     for record in SeqIO.parse(infh, "fasta"):
         if record.id == ensembl_id:
-            assert len(record.seq)%3 == 0  # partial CDS
+            # avoid partial CDS
+            assert len(record.seq)%3 == 0
             for i in range(0,len(record.seq), 3):
                 codons.append(str(record.seq[i:i+3]))
     
-    assert codons  # if false, codons is empty and you didn't find the sequence
+    # if false, codons is empty and you didn't find the sequence
+    assert codons
     return codons
             
 
@@ -47,7 +49,8 @@ def parse_goi_files(dataset, data_files, base_names, goi_id):
 
         for line in infh:
             s = line.rstrip().split("\t")
-            codon_index = int(s[0])  # number, not letters
+            # number, not letters
+            codon_index = int(s[0])
             total = float(s[1])
             data[base_name][codon_index] = total
             
@@ -78,7 +81,7 @@ def write_formatted_goi_files(dataset, base_names, goi_id, codons, data, average
         elif base_name[1] == "T":
             total_base_names.append(base_name)
         else:
-            assert false  # idk fix me
+            assert false
     
     ribo_outline = []
     for base_name in ribo_base_names:
@@ -138,10 +141,10 @@ if __name__ == "__main__":
             if convert[key] == goi_id:
                 ensembl_id = key
     else:
-        print "Invalid gene of interest provided. Exiting program now."
+        print("Invalid gene of interest provided. Exiting program now.")
         
-    print goi_id
-    print ensembl_id
+    print(goi_id)
+    print(ensembl_id)
 
     codons = parse_sequence(args.dataset, ensembl_id)
     

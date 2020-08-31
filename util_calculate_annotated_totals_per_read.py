@@ -22,8 +22,9 @@ def calculate_Annotated_totals_per_read(dataset, base_name):
     
     bamfile = pysam.AlignmentFile("./Annotated_reads/%s/annotated_%s.bam" % (dataset, base_name), "rb")
     for read in bamfile.fetch():
+        # just populating dict the first time
         read_totals[read.query_name] = 0
-    bamfile.close()  # just populating dict the first time
+    bamfile.close()
     
     
     bamfile = pysam.AlignmentFile("./Annotated_reads/%s/annotated_%s.bam" % (dataset, base_name), "rb")
@@ -47,6 +48,6 @@ if __name__ == "__main__":
     
     data_files = sorted(os.listdir("./Annotated_reads/%s/" % args.dataset))  
     for f in data_files:
-        base_name = "_".join(f.split(".")[0].split("_")[1:])  # key for all_reads
+        base_name = "_".join(f.split(".")[0].split("_")[1:])
         calculate_Annotated_totals_per_read(args.dataset, base_name)
 

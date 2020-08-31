@@ -45,8 +45,8 @@ def calculate_length_distribution(dataset):
     
     
     for f in data_files:
-        base_name = f.rsplit("_")[0]  # 1R_CAGATC_L002_R1_001_decontaminated.fastq becomes 1R_CAGATC_L002_R1_001
-        lengths = LengthTallyDict.copy()  # create copy of the template container for this specific file
+        base_name = f.rsplit("_")[0]
+        lengths = LengthTallyDict.copy()
     
         # Read data in, keep tallies
         infh = open("Decontaminated_reads/%s/%s" % (args.dataset, f), "r")
@@ -69,7 +69,7 @@ def calculate_length_distribution(dataset):
             outstring += "," + str(round(float(100*lengths[i])/lentot,3))
         outfh_lenperc.write(outstring + "\n")
     
-        print "Finished %s at" % f, time.ctime()
+        print("Finished %s at" % f, time.ctime())
 
     # Close output files when done with all samples
     outfh_len.close()

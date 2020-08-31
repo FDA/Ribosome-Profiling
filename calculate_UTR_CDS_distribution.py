@@ -21,7 +21,7 @@ data_files = sorted([x for x in os.listdir("./Annotated_reads/%s/" % args.datase
 base_names = []
 
 for f in data_files:
-    base_name = "_".join(f.split(".")[0].split("_")[1:])  # key for all_reads
+    base_name = "_".join(f.split(".")[0].split("_")[1:])
     base_names.append(base_name)
     type_data[base_name] = {}
     
@@ -31,7 +31,8 @@ for f in data_files:
     read_totals = {}
     base_name = "_".join(f.split(".")[0].split("_")[1:])
     tot_infh = open("./Annotated_totals_per_read/%s/%s_read_counts.tsv" % (args.dataset, base_name), "r")
-    tot_infh.next()  # skip header
+    # skip header
+    next(tot_infh)
     for line in tot_infh:
         s = line.rstrip().split("\t")
         read_totals[s[0]] = float(s[1])
@@ -74,15 +75,15 @@ for key in sorted(type_data.keys()):
     outfh.write(",".join(all_line) + "\n")
     
     for length in sorted(type_data[key].keys()):
-        cds = type_data[key][length]["CDS"]  # cds count
-        fputr = type_data[key][length]["5UTR"]  # 5' utr count
-        tputr = type_data[key][length]["3UTR"]  # 3' utr count
+        cds = type_data[key][length]["CDS"]
+        fputr = type_data[key][length]["5UTR"]
+        tputr = type_data[key][length]["3UTR"]
         if sum([cds, fputr, tputr]) == 0:
             pcds, pfputr, ptputr = 0, 0, 0
         else:
             pcds = round((float(100*cds)/(cds+fputr+tputr)),2)
-            pfputr = round((float(100*fputr)/(cds+fputr+tputr)),2)  # % 5' utr
-            ptputr = round((float(100*tputr)/(cds+fputr+tputr)),2)  # % 3' utr
+            pfputr = round((float(100*fputr)/(cds+fputr+tputr)),2)
+            ptputr = round((float(100*tputr)/(cds+fputr+tputr)),2)
         outline = [str(length), str(cds), str(fputr), str(tputr), str(pcds), str(pfputr), str(ptputr)]
         outfh.write(",".join(outline) + "\n")
         

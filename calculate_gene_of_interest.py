@@ -10,11 +10,11 @@ import pdb
 start_time = time.time()
 
 
-def define_dataset_sizes():
-    global allowed_sizes
-    allowed_sizes["S12"] = {}
-    allowed_sizes["S12"]["R"] = [20, 21, 22, 27, 28, 29, 30]
-    allowed_sizes["S12"]["T"] = range(20, 126)
+
+allowed_sizes = {}
+allowed_sizes["S12"] = {}
+allowed_sizes["S12"]["R"] = [20, 21, 22, 27, 28, 29, 30]
+allowed_sizes["S12"]["T"] = list(range(20, 126))
 
 def ensembl_ID_converter(dataset):
     convert = {}
@@ -47,24 +47,26 @@ def create_output_folders(dataset):
         
         
 def calculate_gene_of_interest_coverage(convert, gene_lengths, goi_id, dataset, base_name):
-    sample_type = base_name[1]  # R or T
+    sample_type = base_name[1]
     read_totals = {}
     bamfile = pysam.AlignmentFile("./Annotated_size_filtered_reads/%s/%s_annotated_sized.bam" % (args.dataset, base_name), "rb")
     read_totals = {}
     tot_infh = open("./Annotated_totals_per_read/%s/%s_read_counts.tsv" % (args.dataset, base_name), "r")
-    tot_infh.next()  # skip header
+    # skip header
+    next(tot_infh)
     for line in tot_infh:
         s = line.rstrip().split("\t")
         read_totals[s[0]] = float(s[1])
     tot_infh.close()
     goi_counts = collections.OrderedDict()
+    print(allowed_sizes[dataset][sample_type])
     goi_count_categories = ["All"] + allowed_sizes[dataset][sample_type]
     for size in goi_count_categories:
         goi_counts[size] = collections.OrderedDict()
-        for i in range(0, gene_lengths[goi_id]/3):
+        for i in range(0, int(gene_lengths[goi_id]/3)):
             goi_counts[size][i] = 0
              
-    print goi_counts.keys()
+    print(goi_counts.keys())
         
     for read in bamfile.fetch(until_eof = True):
         length = read.query_length
@@ -88,7 +90,7 @@ def calculate_gene_of_interest_coverage(convert, gene_lengths, goi_id, dataset, 
     
 def write_gene_of_interest(goi_id, goi_counts, dataset, base_name):
     outfile = "./output_goi/%s/%s_%s_fractional_read_counts_by_codon.tsv" % (dataset, goi_id, base_name)
-    print outfile
+    print(outfile)
     outfh = open(outfile, "w")
     header = ["Codon number"]
     for key in goi_counts.keys():
@@ -111,7 +113,6 @@ if __name__ == "__main__":
     parser.add_argument("gene_of_interest", help = "The gene ID of the gene of interest. Can be either ensembl identifier (ex. ENST00000331789.5) or the gene identifier (ex. ACTB). [Note: the output file will always use the gene identifier]")
     args = parser.parse_args()
     
-    define_dataset_sizes()
     convert = ensembl_ID_converter(args.dataset)
     
 
@@ -120,9 +121,9 @@ if __name__ == "__main__":
     elif args.gene_of_interest in convert.values():
         goi_id = args.gene_of_interest
     else:
-        print "Invalid gene of interest provided. Exiting program now."
+        print("Invalid gene of interest provided. Exiting program now.")
         
-    print goi_id
+    print(goi_id)
         
 
     gene_lengths = read_gene_lengths(args.dataset, convert)

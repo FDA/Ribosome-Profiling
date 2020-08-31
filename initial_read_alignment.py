@@ -15,9 +15,9 @@ class DataSetInfo(object):
         self.opttranscriptome1 = opttranscriptome1
         self.opttranscriptome2 = opttranscriptome2
         self.chx = chx
-        self.wt = wt  # list
-        self.opt1 = opt1  # list
-        self.opt2 = opt2  # list
+        self.wt = wt
+        self.opt1 = opt1
+        self.opt2 = opt2
         self.mismatch_allowance = mismatch_allowance
         self.num_alignments = max_multihits
 
@@ -29,16 +29,17 @@ def define_dataset_info():
 
 
 def create_output_folders(dataset):
-    if not os.path.exists("./Tophat_output"):
-        os.mkdir("./Tophat_output")
-    if not os.path.exists("./Tophat_output/%s" % dataset):
-        os.mkdir("./Tophat_output/%s" % dataset)
+    if not os.path.exists("./Hisat_output"):
+        os.mkdir("./Hisat_output")
+    if not os.path.exists("./Hisat_output/%s" % dataset):
+        os.mkdir("./Hisat_output/%s" % dataset)
         
         
         
-def run_tophat(dataset, base_name):
-    
-   
+def run_hisat(dataset, base_name):
+    if not os.path.exists("./Hisat_output/%s/%s" % (dataset, base_name)):
+        os.mkdir("./Hisat_output/%s/%s" % (dataset, base_name))
+
     if base_name[0] in datasetinfo[dataset].wt:
         transcriptome = datasetinfo[dataset].wttranscriptome
     elif base_name[0] in datasetinfo[dataset].opt1:
@@ -46,26 +47,27 @@ def run_tophat(dataset, base_name):
     elif base_name[0] in datasetinfo[dataset].opt2:
         transcriptome = datasetinfo[dataset].opttranscriptome2
     else:
-        assert False  # shouldn't happen-- check to make sure DataSetInfo is populated correctly for this sample 
-    
-    #The following command may be changed depnding on the version of bowtie used to create the reference
-    tophat_cmd = "tophat --bowtie1 -p 6 --no-novel-juncs -N %s -g %s -o ./Tophat_output/%s/%s ./BowtieIndex/%s ./Decontaminated_reads/%s/%s_decontaminated.fastq" % (datasetinfo[dataset].mismatch_allowance, datasetinfo[dataset].num_alignments, dataset, base_name, transcriptome, dataset, base_name)
-    print tophat_cmd
-    p1 = subprocess.Popen(tophat_cmd, shell=True)
+        # shouldn't happen-- check to make sure DataSetInfo is populated correctly for this sample
+        assert False
+
+    #Alignment command
+    hisat_cmd = "hisat2 -p 6 -k %s -x ./HisatIndex/%s -U ./Decontaminated_reads/%s/%s_decontaminated.fastq | samtools view -Sbh > ./Hisat_output/%s/%s/accepted_hits.bam" % (datasetinfo[dataset].num_alignments, transcriptome, dataset, base_name, dataset, base_name)
+
+    print(hisat_cmd)
+    p1 = subprocess.Popen(hisat_cmd, shell=True)
     p1.wait()
         
         
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description = "Run tophat on adapter-trimmed, decontaminated reads.")
+    parser = argparse.ArgumentParser(description = "Run hisat2 on adapter-trimmed, decontaminated reads.")
     parser.add_argument("dataset", help = "The folder you want to look in for the data, inside the Decontaminated_reads folder (S1, S2, etc)")
-    #parser.add_argument("num_alignments", help = "The maximum number of alignments allowed for a read, option -g in tophat (default value = 20)", default = 20)
     args = parser.parse_args()
     
     create_output_folders(args.dataset)
     define_dataset_info()
 
     data_files = sorted([x for x in os.listdir("./Decontaminated_reads/%s/" % args.dataset) if ".fastq" in x])
-    print data_files
+    print(data_files)
     for f in data_files:
         base_name = "_".join(f.split(".")[0].split("_")[:-1])
-        run_tophat(args.dataset, base_name)
+        run_hisat(args.dataset, base_name)
